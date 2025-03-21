@@ -71,27 +71,30 @@ public_users.get('/isbn/:isbn', (req, res) =>{
     
     const ISBN = req.params.isbn;
     const booksArray = Object.values(books);
+
     const booksBasedOnIsbn = (ISBN) => {
-        return new Promise((resolve,reject) =>{
-          setTimeout(() =>{
-            const book = booksArray.find((b) => b.isbn === ISBN);
-            if(book){
-              resolve(book);
-            }else{
-              reject(new Error("Book not found"));
-            }},1000);
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const book = booksArray.find((b) => {
+                    let bookIsbn = Object.keys(books).find(key => books[key] === b);
+                    return bookIsbn === ISBN;
+                });
+                if (book) {
+                    resolve(book);
+                } else {
+                    reject({ message: "Book not found" });
+                }
+            }, 1000);
         });
-    
-            
-    }
-    booksBasedOnIsbn(ISBN).then((book) =>{
-      res.json(book);
-    }).catch((err)=>{
-      res.status(400).json({error:"Book not found"})
-    });
-      
-    //await res.send(books[ISBN]);    
-   
+    };
+
+    booksBasedOnIsbn(ISBN)
+        .then((book) => {
+            res.json(book);
+        })
+        .catch((error) => {
+            res.status(404).json(error); // 404 for "Not Found"
+        });
    });
     
 // Get book details based on author
@@ -99,36 +102,28 @@ public_users.get('/author/:author',async (req, res) => {
 
   //using promises
   const author = req.params.author.toLowerCase().trim();
-  const booksArray = Object.values(books);
-  const booksBasedOnAuthor = (auth) => {
-        return new Promise((resolve,reject) =>{
-          setTimeout(() =>{
-            const filteredbooks = booksArray.filter((b) => b.author.toLowerCase().trim() === auth);
-            if(filteredbooks>0){
-              resolve(filteredbooks);
-            }else{
-              reject(new Error("Book not found"));
-            }},1000);
+    const booksArray = Object.values(books);
+
+    const booksBasedOnAuthor = (auth) => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const filteredBooks = booksArray.filter((book) => book.author.toLowerCase().trim() === auth);
+                if (filteredBooks.length > 0) { // Corrected condition
+                    resolve(filteredBooks);
+                } else {
+                    reject({ message: "No books found for this author" });
+                }
+            }, 1000);
         });
-    
-            
-    }
-    booksBasedOnAuthor(author).then((book) =>{
-      res.json(book);
-    }).catch((err)=>{
-      res.status(400).json({error:"Book not found"})
-    });
- 
-  //let new_books = {}
-  //const new_author = req.params.author;
-  //let i=1;
-  //for(let bookid in books){
-   //   if(books[bookid].author === new_author ){
-    //    new_books[i++] = books[bookid];
-    //  }
-    //}
-    //await res.send(JSON.stringify(new_books))
-  
+    };
+
+    booksBasedOnAuthor(author)
+        .then((foundBooks) => {
+            res.json(foundBooks);
+        })
+        .catch((error) => {
+            res.status(404).json(error); // 404 for "Not Found"
+        });
 });
 
 // Get all books based on title
@@ -144,28 +139,29 @@ public_users.get('/title/:title',async (req, res) => {
   //}
   //await res.send(JSON.stringify(new_books))
 
-  const title = req.params.title;
-  const booksArray = Object.values(books);
-  const booksBasedOnTitle = (booktitle) => {
-        return new Promise((resolve,reject) =>{
-          setTimeout(() =>{
-            const filteredbooks = booksArray.filter((b) => b.title === booktitle);
-            if(filteredbooks>0){
-              resolve(filteredbooks);
-            }else{
-              reject(new Error("Book not found"));
-            }},1000);
-        });
-    
-            
-    }
-    booksBasedOnTitle(title).then((new_books) =>{
-      res.json(new_books);
-    }).catch((err)=>{
-      res.status(400).json({error:"Book not found"})
-    });
+  const title = req.params.title.toLowerCase().trim();
+    const booksArray = Object.values(books);
 
-  
+    const booksBasedOnTitle = (bookTitle) => {
+        return new Promise((resolve, reject) => {
+            setTimeout(() => {
+                const filteredBooks = booksArray.filter((book) => book.title.toLowerCase().trim() === bookTitle);
+                if (filteredBooks.length > 0) { // Corrected condition
+                    resolve(filteredBooks);
+                } else {
+                    reject({ message: "No books found with this title" });
+                }
+            }, 1000);
+        });
+    };
+
+    booksBasedOnTitle(title)
+        .then((foundBooks) => { //Use foundBooks
+            res.json(foundBooks);
+        })
+        .catch((error) => {
+            res.status(404).json(error); // 404 for "Not Found"
+        });
   
 });
 
